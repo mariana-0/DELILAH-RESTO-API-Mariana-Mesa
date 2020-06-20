@@ -1,0 +1,486 @@
+openapi: 3.0.0
+info:
+  title: Delilah-resto
+  description: This is what you have to know to use the Delillah-resto's API.
+  version: 1.0.0
+
+servers: 
+  - url: localhost/v1
+
+
+paths:
+  /products:
+    get:
+      tags:
+        - Products 
+      summary: To return a products list
+      responses:
+        '200': 
+          description: Succesful
+          content:
+            application/json:
+              schema:
+                type: array 
+                items:
+                  $ref: '#/components/schemas/product'             
+    post:
+      tags:
+        - Products 
+      summary: To add a new product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/productadd'
+      #falta JWT
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/product'
+        '400':
+          description: Arguments are missing
+        '401':
+          description: Unauthorized
+  
+  /products/{id}:
+    put:
+      tags:
+        - Products 
+      summary: To update a product by id
+      parameters: 
+        - name: id
+          in: path
+          description: Product ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/productadd'
+       #falta JWT
+      responses:
+        '201':
+          description: Succesful change
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/product'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  properties:
+                    Message:
+                      type: string
+                      description: "Message for the user"
+                      example: "You are not allowed"
+        '404':
+            description: Product had not found
+    delete: 
+      tags:
+        - Products 
+      summary: To delete a product by id
+      parameters: 
+        - name: id
+          in: path
+          description: Product ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200': 
+          description: Succesful 
+          content:
+            application/json:
+              schema:
+                type: array 
+                items:
+                  $ref: '#/components/schemas/product'
+        '404':
+            description: Product had not found
+    
+  /users:
+    get:
+      tags:
+        - Users 
+      summary: To return an users list
+      responses:
+        '200': 
+          description: Succesful
+          content:
+            application/json:
+              schema:
+                type: array 
+                items:
+                  $ref: '#/components/schemas/user' 
+    post:
+      tags:
+        - Users
+      summary: To add a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/useradd'
+      responses:
+          '201':
+            description: Created
+            content:
+              application/json:
+                schema:
+                  type: array 
+                  items:
+                    $ref: '#/components/schemas/user'
+          '400':
+            description: Arguments are missing
+          '409':
+            description: User already created
+            
+  /users/log_in:
+    post:
+      tags:
+        - Users
+      summary: To log in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/userlogin'
+      responses:
+          '201':
+            description: Succesful log in
+          '400':
+            description: Wrong user/password
+            
+  /orders:
+    get:
+      tags:
+        - Orders
+      summary: To return an orders list
+      responses:
+        '200':
+          description: Seccesful
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/orders'
+    post:
+      tags:
+        - Orders
+      summary: To create a new order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/orderadd'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: array 
+                items:
+                  $ref: '#/components/schemas/orders'
+        '400':
+          description: Arguments are missing
+  /orders/{id}:
+    put: 
+      tags:
+        - Orders
+      summary: To update the status of a created order by id
+      parameters:
+        - name: id
+          in: path
+          description: order id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/orderstatus'
+      responses:
+          '201': 
+            description: Succesful 
+          '404':
+            description: Order had not found
+    delete: 
+      tags:
+        - Orders
+      summary: To delete an order by id
+      parameters:
+        - name: id
+          in: path
+          description: order id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+          '200': 
+            description: Succesful 
+          '404':
+            description: Order had not found
+          
+                
+                
+components:
+  schemas:
+  
+    product:
+      properties:
+        id:
+          type: integer
+          description: Product ID
+          example: 1
+        product_name:
+          type: string
+          description: product name
+          example: Special Hamburger
+        product_price:
+          type: number
+          description: product price
+          example: 999
+          
+    productadd:
+      properties:
+        nombre:
+          type: string
+          description: product name
+          example: Special Hamburger
+        price:
+          type: number
+          description: product price
+          example: 999
+          
+    user:
+      properties:
+        user_id:
+          type: integer
+          description: user ID
+          example: 1
+        user_user:
+          type: string
+          description: user
+          example: Pepe10pepino
+        user_name:
+          type: string
+          description: Uer name
+          example: Pepito
+        user_lastname: 
+          type: string
+          description: User lastname
+          example: Pepino
+        user_email:
+          type: string
+          description: User email
+          example: pepepepino@pepe.com
+        user_phone_number:
+          type: integer
+          description: User phone number
+          example: 1234
+        user_address: 
+          type: string
+          description: User address
+          example: 1 Street
+        user_password:
+          type: string
+          description: User password
+          example: soypepepepino
+          
+    useradd:
+      properties:
+        user_user:
+          type: string
+          description: user
+          example: Pepe10pepino
+        user_name:
+          type: string
+          description: Uer name
+          example: Pepito
+        user_lastname: 
+          type: string
+          description: User lastname
+          example: Pepino
+        user_email:
+          type: string
+          description: User email
+          example: pepepepino@pepe.com
+        user_phone_number:
+          type: integer
+          description: User phone number
+          example: 1234
+        user_address: 
+          type: string
+          description: User address
+          example: 1 Street
+        user_password:
+          type: string
+          description: User password
+          example: soypepepepino
+          
+    userlogin:
+      properties:
+        user_user:
+          type: string
+          description: user
+          example: Pepe10pepino
+        user_password:
+          type: string
+          description: User password
+          example: soypepepepino
+    
+    orders:
+      properties:
+        order_id:
+          type: integer
+          description: Order ID
+          example: 1
+        order_status:
+          type: string
+          description: Order status
+          example: new
+        order_time:
+          type: string
+          description: Order hour
+          example: '13:00'
+        order_number:
+          type: string
+          description: Order number
+          example: '#3'
+        order_description:
+          type: string
+          description: Order description
+          example: 1 Sp Hamb
+        order_payment_method:
+          type: string
+          description: Order payment method
+          example: cash
+        order_total_paid:
+          type: string
+          description: Total paid
+          example: "$660"
+        user_user:
+          type: string
+          description: user
+          example: Pepe10pepino
+        user_name:
+          type: string
+          description: Uer name
+          example: Pepito
+        user_lastname: 
+          type: string
+          description: User lastname
+          example: Pepino
+        user_email:
+          type: string
+          description: User email
+          example: pepepepino@pepe.com
+        user_phone_number:
+          type: integer
+          description: User phone number
+          example: 1234
+        user_address: 
+          type: string
+          description: User address
+          example: 1 Street
+        ordered_products:
+          type: array
+          items:
+            type: object
+            properties:
+              product_amount:
+                type: integer
+                description: products amount
+                example: 2
+              product_name:
+                type: string
+                description: product name
+                example: Special Hamburger
+              product_price:
+                type: number
+                description: product price
+                example: 330
+    orderadd:
+      properties:
+        ordered_products:
+          type: array
+          items:
+            type: object
+            properties:
+              product_amount:
+                type: integer
+                description: products amount
+                example: 2
+              product_name:
+                type: string
+                description: product name
+                example: Special Hamburger
+        order_payment_method:
+          type: string
+          description: Order payment method
+          example: cash
+        user_address: 
+          type: string
+          description: User address
+          example: 1 Street
+          
+    orderstatus:
+      properties:
+        order_status:
+          type: string
+          description: Order status
+          example: new
+          
+      
+        
+        
+              
+        
+        
+                
+              
+            
+          
+        
+          
+          
+        
+          

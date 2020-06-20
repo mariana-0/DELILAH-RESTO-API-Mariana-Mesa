@@ -1,0 +1,7 @@
+TABLE PRODUCTS
+
+CREATE TABLE products (
+id INT PRIMARY KEY AUTO_INCREMENT,
+    product_name VARCHAR(60) NOT NULL,
+    product_price INT UNSIGNED NOT NULL
+)
