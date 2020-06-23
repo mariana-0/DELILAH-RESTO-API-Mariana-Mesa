@@ -176,7 +176,7 @@ paths:
           '201':
             description: Succesful log in
           '400':
-            description: Wrong user/password
+            description: Wrong email/password
             
   /orders:
     get:
