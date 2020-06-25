@@ -3,10 +3,9 @@ const Sequelize = require('sequelize');
 const sequelize = new Sequelize('mysql://root:@localhost:3306/delilahresto');
 const router = express.Router();
 
-var product;
-var product_id;
+const validations = require('./uservalidation');
 
-router.get('/', (req,res)=>{
+router.get('/', validations.verifyToken, (req,res)=>{
     const SelectQuery = 'SELECT * FROM products';
 
     sequelize.query(SelectQuery, {type:sequelize.QueryTypes.SELECT})
@@ -15,7 +14,7 @@ router.get('/', (req,res)=>{
         }).catch((e)=>console.log(e));
 })
 
-router.post('/',fullData,(req,res)=>{
+router.post('/',validations.verifyToken,validations.isAdmin,fullData,(req,res)=>{
     const InsertQuery = 'INSERT INTO products(product_name,product_price) VALUES (?,?)';
     const {product_name, product_price} = req.body;
     console.log(req.body)
@@ -25,7 +24,7 @@ router.post('/',fullData,(req,res)=>{
         }).catch((e)=>console.error(e));
 })
 
-router.put('/:product_id',DoesProductExist,(req,res)=>{
+router.put('/:product_id',validations.verifyToken,validations.isAdmin,DoesProductExist,(req,res)=>{
     const id = req.params.product_id;
     const {product_name,product_price} = req.body;
     const UpdateQuery = `UPDATE products SET product_name= ?, product_price=? WHERE product_id = ${id}`
@@ -36,7 +35,8 @@ router.put('/:product_id',DoesProductExist,(req,res)=>{
         }).catch((e)=>console.error(e))
 })
 
-router.delete('/:product_id', DoesProductExist,(req,res)=>{
+router.delete('/:product_id', validations.verifyToken,validations.isAdmin, DoesProductExist,(req,res)=>{
+    const product_id = req.params.product_id;
     const DeleteQuery = `DELETE FROM products WHERE product_id=${product_id}`
 
     sequelize.query(DeleteQuery)
@@ -56,7 +56,7 @@ function fullData(req, res, next) {
 }
 
 function DoesProductExist(req,res,next){
-    product_id = req.params.product_id;
+    const product_id = req.params.product_id;
     console.log(product_id)
     const SelectQuery = 'SELECT * FROM products'
 
@@ -64,7 +64,7 @@ function DoesProductExist(req,res,next){
         .then((response)=>{
             const products_list = response;
             console.log(products_list)
-            product = products_list.find( (element) => element.product_id === Number(product_id));
+            const product = products_list.find( (element) => element.product_id === Number(product_id));
             console.log(product)
 
             if (!product){
