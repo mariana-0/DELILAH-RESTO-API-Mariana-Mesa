@@ -54,6 +54,7 @@ function DoesThisUserExist(req,res,next){
             if (user_passwordc) {var useridp = user_passwordc.user_id};
 
             if (!user_emailc || !user_passwordc || useride != useridp){
+                var userID = useride;
                 return res.status(409).send('Wrong email/password')
             }
             else{
@@ -68,7 +69,7 @@ function verifyToken (req,res,next){
     const token = req.headers.authorization.split(' ')[1];
     const verifytoken = JWT.verify(token,signature);
         if(verifytoken){
-            req.body.email = verifytoken.email;
+            req.body.user_email = verifytoken.user_email;
             return next();
         }
     }catch (e){
@@ -87,7 +88,7 @@ function isAdmin (req,res,next){
                 return res.status(409).send('You are not an administrador')
             }else if(user_isadmin==1){
                 next();
-            }
+            } 
             
         }).catch((e)=>console.log(e));
 }

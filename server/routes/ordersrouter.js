@@ -27,6 +27,29 @@ router.get('/:order_id',validations.verifyToken,validations.isAdmin,DoesOrderExi
         }).catch((e)=>console.log(e));
 })
 
+router.post('/',validations.verifyToken,(req,res)=>{
+    const InsertQuery = 'INSERT INTO orders (order_status,order_time,order_description,order_payment_method,order_total_paid,id_user) VALUES (?,?,?,?,?,?)'
+    const {order_payment_method,items,id_user} = req.body
+
+    const time = new Date ();
+    const order_time = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds();
+    const order_status = 'New';
+
+    sequelize.query(InsertQuery,{replacements:[order_status, order_time, 'order_description', order_payment_method, 1111, id_user]})
+        .then((response)=>{
+            const [order_id]=response
+            const InsertQueryP = 'INSERT INTO order_products (id_order, id_product, quantity_product) VALUES (?,?,?)'
+            items.forEach(element => {
+                
+                sequelize.query(InsertQueryP,{replacements:[order_id,element.id_product,element.quantity_product]})
+                    .then((resp)=>{
+                        res.json('Dio')
+                    }).catch((e)=>console.error(e))
+            });
+        }).catch((e)=>console.error(e))
+
+});
+
 function DoesOrderExist(req,res,next){
     const order_id = req.params.order_id;
     console.log(order_id)
