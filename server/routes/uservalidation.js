@@ -54,7 +54,7 @@ function DoesThisUserExist(req,res,next){
             if (user_passwordc) {var useridp = user_passwordc.user_id};
 
             if (!user_emailc || !user_passwordc || useride != useridp){
-                var userID = useride;
+                /* var userID = useride; */
                 return res.status(409).send('Wrong email/password')
             }
             else{
@@ -76,7 +76,7 @@ function verifyToken (req,res,next){
         return res.status(409).send('You are not allowed')
     }   
 }
-
+ 
 function isAdmin (req,res,next){
 
     const SelectQuery = 'SELECT * FROM users'
@@ -91,7 +91,6 @@ function isAdmin (req,res,next){
             } 
             
         }).catch((e)=>console.log(e));
-}
-
+} 
 
 module.exports = {fullDataUsers,userAlreadyExists,DoesThisUserExist,verifyToken,isAdmin}
