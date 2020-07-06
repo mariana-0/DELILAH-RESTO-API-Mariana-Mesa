@@ -45,7 +45,7 @@ function VerifyUser(req,res,next){
 
 }
 
-/* async function VerifyProducts (req,res,next){
+async function VerifyProducts (req,res,next){
     const {items} = req.body;
     let a = false;
     let error = 'Hi';
@@ -83,6 +83,8 @@ function VerifyUser(req,res,next){
     if(a){
         return res.status(409).send(error)
     }else{
+        req.order_total_paid = order_total_paid;
+        req.order_description = order_description;
         next();
     }
 }
@@ -91,7 +93,7 @@ async function ProductById(id){
     const SelectQuery = 'Select * from products where product_id = ?'
     const product = await sequelize.query(SelectQuery,{raw: true,replacements: [id]});
     return product;
-}  */
+}  
 
 
-module.exports = {DoesOrderExist,VerifyUser}
+module.exports = {DoesOrderExist,VerifyUser,VerifyProducts}

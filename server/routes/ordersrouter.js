@@ -28,10 +28,11 @@ router.get('/:order_id',validations.verifyToken,validations.isAdmin,ordervalidat
         }).catch((e)=>console.log(e));
 })
 
-router.post('/',validations.verifyToken,ordervalidations.VerifyUser,VerifyProducts,(req,res)=>{
+router.post('/',validations.verifyToken,ordervalidations.VerifyUser,ordervalidations.VerifyProducts,(req,res)=>{
     const InsertQuery = 'INSERT INTO orders (order_status,order_time,order_description,order_payment_method,order_total_paid,id_user) VALUES (?,?,?,?,?,?)'
     const {order_payment_method,items,id_user} = req.body
-
+    const{order_total_paid} = req
+    const {order_description} = req
     const time = new Date ();
     const order_time = time.getHours()+':'+time.getMinutes()+':'+time.getSeconds();
     const order_status = 'New';
@@ -60,53 +61,15 @@ router.put('/:order_id',validations.verifyToken,validations.isAdmin,ordervalidat
         }).catch((e)=>console.error(e))
 })
 
-async function VerifyProducts (req,res,next){
-    const {items} = req.body;
-    let a = false;
-    let error = 'Hi';
-    order_description = '';
-    order_total_paid = 0;
+router.delete('/:order_id', validations.verifyToken,validations.isAdmin, ordervalidations.DoesOrderExist,(req,res)=>{
+    const order_id = req.params.order_id;
+    const DeleteQuery = `DELETE FROM orders WHERE order_id=${order_id}`
 
-    for(let i=0;i<items.length;i++){
-        const productID = items[i].id_product;
-        const [ExistentProduct] = await ProductById(productID)
-        
-        if(ExistentProduct.length){
-            const productQ = items[i].quantity_product;
-            
-            if (productQ){
-                order_description = `${order_description}${productQ}x${ExistentProduct[0].product_name} `;
-                order_total_paid = order_total_paid +(ExistentProduct[0].product_price * productQ)
-                console.log(order_description); 
-                console.log(order_total_paid)
-            } else{
-                
-                a = true;
-                error = 'Quantity es required';
-                break;
-            }
-            
-        }else{
-            console.log(`This is ${a}`)
-            a = true;
-            error = `Product with id: ${productID} does not exist`;
-            break;
-        }
-        
-    }
-    console.log(a)
-    if(a){
-        return res.status(409).send(error)
-    }else{
-        
-        next();
-    }
-}
+    sequelize.query(DeleteQuery)
+    .then((response)=>{
+        res.json({status:'Deleted',DeleteQuery})
+    }).catch((e)=>console.error(e))
+})
 
-async function ProductById(id){
-    const SelectQuery = 'Select * from products where product_id = ?'
-    const product = await sequelize.query(SelectQuery,{raw: true,replacements: [id]});
-    return product;
-} 
 
 module.exports = router

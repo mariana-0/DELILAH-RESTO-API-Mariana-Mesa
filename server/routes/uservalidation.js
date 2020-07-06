@@ -54,7 +54,7 @@ function DoesThisUserExist(req,res,next){
             if (user_passwordc) {var useridp = user_passwordc.user_id};
 
             if (!user_emailc || !user_passwordc || useride != useridp){
-                /* var userID = useride; */
+                
                 return res.status(409).send('Wrong email/password')
             }
             else{

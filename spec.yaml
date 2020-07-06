@@ -216,6 +216,29 @@ paths:
         '400':
           description: Arguments are missing
   /orders/{id}:
+    get:
+      tags:
+        - Orders
+      summary: To get the details of an specific order by id
+      parameters:
+        - name: id
+          in: path
+          description: order id
+          required: true
+          schema:
+            type: integer
+            format: int
+      responses:
+        '200':  
+          description: Succesful
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/orders'
+        '404':
+          description: Order does not exist
     put: 
       tags:
         - Orders
