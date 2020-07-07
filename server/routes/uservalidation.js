@@ -12,7 +12,6 @@ function fullDataUsers(req, res, next) {
     const {user_user,user_name,user_lastname,user_email,user_phone_number,user_address,user_password,is_admin} = req.body;
 
     if(!user_user || !user_name || !user_lastname || !user_email || !user_phone_number || !user_address || !user_password || (is_admin!=0 && is_admin!=1)){
-        console.log(req.body)
         res.status(400).send('Data are missing');
     } else {
         next();
@@ -31,7 +30,7 @@ function userAlreadyExists(req,res,next){
             const user_emailv = users_list.find ((element) => element.user_email == user_email);
 
             if (user_userv || user_emailv){
-                return res.status(409).send('User already exists')
+                return res.status(400).send('User already exists')
             }else{
                 next();
             }
@@ -55,7 +54,7 @@ function DoesThisUserExist(req,res,next){
 
             if (!user_emailc || !user_passwordc || useride != useridp){
                 
-                return res.status(409).send('Wrong email/password')
+                return res.status(400).send('Wrong email/password')
             }
             else{
                 next();
@@ -73,7 +72,7 @@ function verifyToken (req,res,next){
             return next();
         }
     }catch (e){
-        return res.status(409).send('You are not allowed')
+        return res.status(401).send('Unauthorized')
     }   
 }
  
@@ -85,7 +84,7 @@ function isAdmin (req,res,next){
         .then((response)=>{
             const user_isadmin = user_emailc.is_admin
             if (user_isadmin==0){
-                return res.status(409).send('You are not an administrador')
+                return res.status(403).send('Forbidden')
             }else if(user_isadmin==1){
                 next();
             } 
@@ -93,4 +92,30 @@ function isAdmin (req,res,next){
         }).catch((e)=>console.log(e));
 } 
 
-module.exports = {fullDataUsers,userAlreadyExists,DoesThisUserExist,verifyToken,isAdmin}
+async function isAdminOrder (req,res,next){
+    
+    const order_id = req.params.order_id;
+    const SelectQuery = 'SELECT * FROM users'
+    const [Eorder] = await UserByIorderId(order_id)
+    const iduser = Eorder[0].id_user;
+
+    sequelize.query(SelectQuery,{type:sequelize.QueryTypes.SELECT})
+        .then((response)=>{
+            const user_isadmin = user_emailc.is_admin
+            const user_ID = user_emailc.user_id;
+            if (user_isadmin==1 || iduser == user_ID){
+                next()
+            }else{
+                return res.status(403).send('Forbidden');
+            } 
+            
+        }).catch((e)=>console.log(e));
+} 
+
+async function UserByIorderId(id){
+    const SelectQuery = 'Select * from orders where order_id = ?'
+    const order = await sequelize.query(SelectQuery,{raw: true,replacements: [id]});
+    return order;
+}
+
+module.exports = {fullDataUsers,userAlreadyExists,DoesThisUserExist,verifyToken,isAdmin,isAdminOrder}

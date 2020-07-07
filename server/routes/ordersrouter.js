@@ -14,17 +14,23 @@ router.get('/',validations.verifyToken,validations.isAdmin,(req,res)=>{
         }).catch((e)=>console.log(e));
 })
 
-router.get('/:order_id',validations.verifyToken,validations.isAdmin,ordervalidations.DoesOrderExist,(req,res)=>{
+router.get('/:order_id',validations.verifyToken,validations.isAdminOrder,ordervalidations.DoesOrderExist,(req,res)=>{
     const id = req.params.order_id;
-    const SelectJoinQuery = `SELECT products.product_name, products.product_price, order_products.quantity_product, orders.order_total_paid, orders.order_status, orders.order_payment_method, users.user_address, users.user_name, users.user_lastname, users.user_user, users.user_email, users.user_phone_number 
-    FROM order_products
-    INNER JOIN products ON products.product_id = order_products.id_product
-    INNER JOIN orders ON orders.order_id = order_products.id_order
+    const SelectJoinQuery =  `SELECT orders.order_total_paid, orders.order_status, orders.order_payment_method, users.user_address, users.user_name, users.user_lastname, users.user_user, users.user_email, users.user_phone_number FROM orders
     INNER JOIN users ON orders.id_user = users.user_id WHERE order_id = ${id}`;
 
     sequelize.query(SelectJoinQuery, {type:sequelize.QueryTypes.SELECT})
         .then((response)=>{
-            res.json(response);
+            const [OrderDetails] = response
+            const Select2JoinQuery = `SELECT products.product_name, products.product_price, order_products.quantity_product 
+            FROM order_products
+            INNER JOIN products ON products.product_id = order_products.id_product WHERE id_order = ${id} `
+            sequelize.query(Select2JoinQuery,{type:sequelize.QueryTypes.SELECT})
+                .then((respo)=>{
+                    OrderDetails[0] = respo;
+                    res.json(OrderDetails)
+                })
+            
         }).catch((e)=>console.log(e));
 })
 
@@ -44,7 +50,7 @@ router.post('/',validations.verifyToken,ordervalidations.VerifyUser,ordervalidat
             items.forEach(element => {
                 sequelize.query(InsertQueryP,{replacements:[order_id,element.id_product,element.quantity_product]})
             });
-            res.json('Dio')
+            res.status(201).send('Order added')
         }).catch((e)=>{console.error(e)})
 
 });
@@ -57,17 +63,19 @@ router.put('/:order_id',validations.verifyToken,validations.isAdmin,ordervalidat
 
     sequelize.query(UpdateQuery, {replacements:[order_status]})
         .then((response)=>{
-            res.json({status: 'Updated', products:req.body})
+            res.status(201).send('Updated')
         }).catch((e)=>console.error(e))
 })
 
 router.delete('/:order_id', validations.verifyToken,validations.isAdmin, ordervalidations.DoesOrderExist,(req,res)=>{
     const order_id = req.params.order_id;
-    const DeleteQuery = `DELETE FROM orders WHERE order_id=${order_id}`
+    const DeleteQuery = `DELETE FROM order_products WHERE id_order=${order_id}`
 
     sequelize.query(DeleteQuery)
     .then((response)=>{
-        res.json({status:'Deleted',DeleteQuery})
+        const DeleteQueryO = `DELETE FROM orders WHERE order_id=${order_id}`
+        sequelize.query(DeleteQueryO)
+        res.status(200).send('Deleted')
     }).catch((e)=>console.error(e))
 })
 

@@ -1,13 +1,9 @@
 const express = require('express');
-const body = require('body-parser');
 const server = express ();
-const cors = require('cors')
 const productsrouter = require('./routes/productsrouter');
 const usersrouter = require('./routes/usersrouter');
 const ordersrouter = require('./routes/ordersrouter')
 
-server.use(cors())
-server.use(body.json());
 server.use(express.json());
 
 server.use('/products',productsrouter)

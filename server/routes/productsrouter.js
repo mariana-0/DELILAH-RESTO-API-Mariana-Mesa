@@ -17,10 +17,9 @@ router.get('/', validations.verifyToken, (req,res)=>{
 router.post('/',validations.verifyToken,validations.isAdmin,fullData,(req,res)=>{
     const InsertQuery = 'INSERT INTO products(product_name,product_price) VALUES (?,?)';
     const {product_name, product_price} = req.body;
-    console.log(req.body)
     sequelize.query(InsertQuery,{replacements:[product_name,product_price]})
         .then((response)=>{
-            res.json(req.body)
+            res.status(201).json({status: 'Created', products:req.body})
         }).catch((e)=>console.error(e));
 })
 
@@ -57,18 +56,15 @@ function fullData(req, res, next) {
 
 function DoesProductExist(req,res,next){
     const product_id = req.params.product_id;
-    console.log(product_id)
     const SelectQuery = 'SELECT * FROM products'
 
     sequelize.query(SelectQuery,{type:sequelize.QueryTypes.SELECT})
         .then((response)=>{
             const products_list = response;
-            console.log(products_list)
             const product = products_list.find( (element) => element.product_id === Number(product_id));
-            console.log(product)
 
             if (!product){
-                return res.status(404).send('Product was not found')
+                return res.status(404).send('Not found')
             }else{
                 next();
             }

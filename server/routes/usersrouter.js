@@ -17,10 +17,9 @@ router.get('/',validations.verifyToken,validations.isAdmin,(req,res)=>{
 router.post('/',validations.fullDataUsers,validations.userAlreadyExists,(req,res)=>{
     const InsertQuery = 'INSERT INTO users(user_user,user_name,user_lastname,user_email,user_phone_number,user_address,user_password,is_admin) VALUES (?,?,?,?,?,?,?,?)';
     const {user_user,user_name,user_lastname,user_email,user_phone_number,user_address,user_password,is_admin} = req.body;
-    console.log(req.body)
     sequelize.query(InsertQuery,{replacements:[user_user,user_name,user_lastname,user_email,user_phone_number,user_address,user_password,is_admin]})
         .then((response)=>{
-            res.json(req.body)
+            res.status(201).json(req.body)
         }).catch((e)=>console.error(e));
 })
 
@@ -28,7 +27,6 @@ router.post('/log_in',validations.DoesThisUserExist,(req,res)=>{
     const {user_email,user_password} = req.body
     const token = JWT.sign(user_email,signature);
     console.log(token)
-    console.log(req.body)
     res.json('Welcome')
 })
 
