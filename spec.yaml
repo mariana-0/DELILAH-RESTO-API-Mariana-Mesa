@@ -5,8 +5,7 @@ info:
   version: 1.0.0
 
 servers: 
-  - url: localhost/v1
-
+  - url: localhost
 
 paths:
   /products:
@@ -14,6 +13,13 @@ paths:
       tags:
         - Products 
       summary: To return a products list
+      parameters:
+      - in: header
+        name: authorization
+        description: Authentication Token
+        required: true
+        schema:
+          type: string
       responses:
         '200': 
           description: Succesful
@@ -22,11 +28,20 @@ paths:
               schema:
                 type: array 
                 items:
-                  $ref: '#/components/schemas/product'             
+                  $ref: '#/components/schemas/product'
+        '401':
+          description: Unauthorized
     post:
       tags:
         - Products 
-      summary: To add a new product
+      summary: To add a new product. It must be added by a system administrator
+      parameters:
+      - in: header
+        name: authorization
+        description: Authentication Token
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
@@ -35,7 +50,6 @@ paths:
               type: array
               items:
                 $ref: '#/components/schemas/productadd'
-      #falta JWT
       responses:
         '201':
           description: Created
@@ -44,25 +58,33 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/product'
+                  $ref: '#/components/schemas/productadded'
         '400':
-          description: Arguments are missing
+          description: Data are missing
         '401':
           description: Unauthorized
+        '403':
+          description: Forbidden
   
   /products/{id}:
     put:
       tags:
         - Products 
-      summary: To update a product by id
-      parameters: 
-        - name: id
-          in: path
-          description: Product ID
-          required: true
-          schema:
-            type: integer
-            format: int64
+      summary: To update a product by id. It must be updated by a system administrator
+      parameters:
+      - in: header
+        name: authorization
+        description: Authentication Token
+        required: true
+        schema:
+          type: string
+      - name: id
+        in: path
+        description: Product ID
+        required: true
+        schema:
+          type: integer
+          format: int64
       requestBody:
         required: true
         content:
@@ -71,7 +93,6 @@ paths:
               type: array
               items:
                 $ref: '#/components/schemas/productadd'
-       #falta JWT
       responses:
         '201':
           description: Succesful change
@@ -80,26 +101,24 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/product'
+                  $ref: '#/components/schemas/productupdated'
         '401':
           description: Unauthorized
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  properties:
-                    Message:
-                      type: string
-                      description: "Message for the user"
-                      example: "You are not allowed"
+        '403':
+          description: Forbidden
         '404':
-            description: Product had not found
+            description: Not found
     delete: 
       tags:
         - Products 
-      summary: To delete a product by id
-      parameters: 
+      summary: To delete a product by id.It must be deleted by a system administrator
+      parameters:
+        - in: header
+          name: authorization
+          description: Authentication Token
+          required: true
+          schema:
+            type: string
         - name: id
           in: path
           description: Product ID
@@ -116,14 +135,25 @@ paths:
                 type: array 
                 items:
                   $ref: '#/components/schemas/product'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
         '404':
-            description: Product had not found
+            description: Not found
     
   /users:
     get:
       tags:
         - Users 
-      summary: To return an users list
+      summary: To return an users list. Only system administrators can get it
+      parameters:
+        - in: header
+          name: authorization
+          description: Authentication Token
+          required: true
+          schema:
+            type: string
       responses:
         '200': 
           description: Succesful
@@ -153,11 +183,9 @@ paths:
                 schema:
                   type: array 
                   items:
-                    $ref: '#/components/schemas/user'
+                    $ref: '#/components/schemas/useradd'
           '400':
-            description: Arguments are missing
-          '409':
-            description: User already created
+            description: Data are missing / User already exists
             
   /users/log_in:
     post:
@@ -173,8 +201,8 @@ paths:
               items:
                 $ref: '#/components/schemas/userlogin'
       responses:
-          '201':
-            description: Succesful log in
+          '200':
+            description: Welcome
           '400':
             description: Wrong email/password
             
@@ -182,7 +210,14 @@ paths:
     get:
       tags:
         - Orders
-      summary: To return an orders list
+      summary: To return an orders list.Only system administrators can get it
+      parameters:
+        - in: header
+          name: authorization
+          description: Authentication Token
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Seccesful
@@ -191,11 +226,18 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/orders'
+                  $ref: '#/components/schemas/ordersget'
     post:
       tags:
         - Orders
       summary: To create a new order
+      parameters:
+        - in: header
+          name: authorization
+          description: Authentication Token
+          required: true
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -206,20 +248,16 @@ paths:
                 $ref: '#/components/schemas/orderadd'
       responses:
         '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                type: array 
-                items:
-                  $ref: '#/components/schemas/orders'
+          description: Order added
+        '404':
+          description: User with id does not exist
         '400':
-          description: Arguments are missing
+          description: Data are missing/ Product with id does not exist
   /orders/{id}:
     get:
       tags:
         - Orders
-      summary: To get the details of an specific order by id
+      summary: To get the details of an specific order by id. Only the order owner or system administrator can get them.
       parameters:
         - name: id
           in: path
@@ -228,6 +266,12 @@ paths:
           schema:
             type: integer
             format: int
+        - in: header
+          name: authorization
+          description: Authentication Token
+          required: true
+          schema:
+            type: string
       responses:
         '200':  
           description: Succesful
@@ -238,11 +282,11 @@ paths:
                 items:
                   $ref: '#/components/schemas/orders'
         '404':
-          description: Order does not exist
+          description: Not found
     put: 
       tags:
         - Orders
-      summary: To update the status of a created order by id
+      summary: To update the status of a created order by id. It must be updated by a system administrator
       parameters:
         - name: id
           in: path
@@ -251,6 +295,12 @@ paths:
           schema:
             type: integer
             format: int64
+        - in: header
+          name: authorization
+          description: Authentication Token
+          required: true
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -261,13 +311,13 @@ paths:
                 $ref: '#/components/schemas/orderstatus'
       responses:
           '201': 
-            description: Succesful 
+            description: Updated
           '404':
-            description: Order had not found
+            description: Not found
     delete: 
       tags:
         - Orders
-      summary: To delete an order by id
+      summary: To delete an order by id. It must deleted by a system administrator
       parameters:
         - name: id
           in: path
@@ -276,20 +326,24 @@ paths:
           schema:
             type: integer
             format: int64
+        - in: header
+          name: authorization
+          description: Authentication Token
+          required: true
+          schema:
+            type: string
       responses:
           '200': 
-            description: Succesful 
+            description: Deleted 
           '404':
-            description: Order had not found
-          
-                
+            description: Not found
                 
 components:
   schemas:
   
     product:
       properties:
-        id:
+        product_id:
           type: integer
           description: Product ID
           example: 1
@@ -304,15 +358,45 @@ components:
           
     productadd:
       properties:
-        nombre:
+        product_name:
           type: string
           description: product name
           example: Special Hamburger
-        price:
+        product_price:
           type: number
           description: product price
           example: 999
           
+    productadded:
+      properties:
+        status:
+          type: string
+          example: Created
+        products: 
+          type: array
+          items:
+            properties:
+              product_name:
+                type: string
+                example: Special Hamburguer
+              product_price:
+                type: integer
+                example: 999
+    productupdated:
+      properties:
+        status:
+          type: string
+          example: Updated
+        products: 
+          type: array
+          items:
+            properties:
+              product_name:
+                type: string
+                example: Special Hamburguer
+              product_price:
+                type: integer
+                example: 999
     user:
       properties:
         user_id:
@@ -378,6 +462,9 @@ components:
           type: string
           description: User password
           example: soypepepepino
+        is_admin:
+          type: integer
+          example: 1
           
     userlogin:
       properties:
@@ -389,8 +476,8 @@ components:
           type: string
           description: User password
           example: soypepepepino
-    
-    orders:
+          
+    ordersget:
       properties:
         order_id:
           type: integer
@@ -404,10 +491,6 @@ components:
           type: string
           description: Order hour
           example: '13:00'
-        order_number:
-          type: string
-          description: Order number
-          example: '#3'
         order_description:
           type: string
           description: Order description
@@ -420,10 +503,10 @@ components:
           type: string
           description: Total paid
           example: "$660"
-        user_user:
-          type: string
+        id_user:
+          type: integer
           description: user
-          example: Pepe10pepino
+          example: 1
         user_name:
           type: string
           description: Uer name
@@ -432,27 +515,17 @@ components:
           type: string
           description: User lastname
           example: Pepino
-        user_email:
-          type: string
-          description: User email
-          example: pepepepino@pepe.com
-        user_phone_number:
-          type: integer
-          description: User phone number
-          example: 1234
         user_address: 
           type: string
           description: User address
           example: 1 Street
-        ordered_products:
+    orders:
+      properties:
+        0:
           type: array
           items:
             type: object
             properties:
-              product_amount:
-                type: integer
-                description: products amount
-                example: 2
               product_name:
                 type: string
                 description: product name
@@ -461,9 +534,54 @@ components:
                 type: number
                 description: product price
                 example: 330
+              quantity_product:
+                type: integer
+                description: products amount
+                example: 2
+        order_total_paid:
+          type: integer
+          description: Total paid
+          example: 660
+        order_status:
+          type: string
+          description: Order status
+          example: new
+        order_payment_method:
+          type: string
+          description: Order payment method
+          example: cash
+        user_address: 
+          type: string
+          description: User address
+          example: 1 Street
+        user_name:
+          type: string
+          description: Uer name
+          example: Pepito
+        user_lastname: 
+          type: string
+          description: User lastname
+          example: Pepino
+        user_user:
+          type: string
+          description: user
+          example: Pepe10pepino
+        user_email:
+          type: string
+          description: User email
+          example: pepepepino@pepe.com
+        user_phone_number:
+          type: integer
+          description: User phone number
+          example: 1234
+    
     orderadd:
       properties:
-        ordered_products:
+        order_payment_method:
+          type: string
+          description: Order payment method
+          example: cash
+        items:
           type: array
           items:
             type: object
@@ -476,14 +594,10 @@ components:
                 type: string
                 description: product name
                 example: Special Hamburger
-        order_payment_method:
-          type: string
-          description: Order payment method
-          example: cash
-        user_address: 
-          type: string
-          description: User address
-          example: 1 Street
+        id_user: 
+          type: integer
+          description: User id
+          example: 1
           
     orderstatus:
       properties:
