@@ -26,8 +26,7 @@ router.post('/',validations.fullDataUsers,validations.userAlreadyExists,(req,res
 router.post('/log_in',validations.DoesThisUserExist,(req,res)=>{
     const {user_email,user_password} = req.body
     const token = JWT.sign(user_email,signature);
-    console.log(token)
-    res.json('Welcome')
+    res.status(201).json(token)
 })
 
 module.exports = router

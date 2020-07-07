@@ -201,8 +201,8 @@ paths:
               items:
                 $ref: '#/components/schemas/userlogin'
       responses:
-          '200':
-            description: Welcome
+          '201':
+            description: Token
           '400':
             description: Wrong email/password
             
@@ -486,7 +486,7 @@ components:
         order_status:
           type: string
           description: Order status
-          example: new
+          example: Sent
         order_time:
           type: string
           description: Order hour
