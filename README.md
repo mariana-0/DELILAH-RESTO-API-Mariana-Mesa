@@ -1,6 +1,3 @@
-# Proyecto-3-Nuevo
-Tercer proyecto de acámica
-
 DELILAH RESTÓ'S API
 
 AVAILABLE FUNCTIONS:
